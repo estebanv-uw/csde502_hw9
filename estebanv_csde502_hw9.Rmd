@@ -142,6 +142,7 @@ A tabulation of the total number of HH members in each HH is furnished below.
 ```
 
 `r tab.nums(name = "t01", caption = "Frequency Table, Total Number of Household Members, Including Respondent")`
+
 ```{r, echo = FALSE, results = "markdown"}
 #Step 2.0.7: Printing table
 tab.z
@@ -153,12 +154,13 @@ A histogram describing the total number of HH members in each HH is furnished be
 #Step 2.0.8: Generating histogram
 fig.z = ggplot(data = s.df, aes(hh_mtotal)) +
         geom_histogram(binwidth = 1) +
-        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        scale_x_continuous(breaks = seq(0, 25, 1)) +
         xlab("\nTotal Number of Household Members, Including Respondent") + 
         ylab("Frequency Count\n")
 ```
 
 `r fig.nums(name = "f01", caption = "Histogram, Total number of Household Members, Including Respondant")`
+
 ```{r, echo = FALSE, results = "markdown"}
 #Step 2.0.9: Printing figure
 fig.z
@@ -199,7 +201,7 @@ s.df %<>% mutate(hh_stotal = p.df$hh_stotal)
 #Step 3.0.6: Generating histogram
 fig.z = ggplot(data = s.df, aes(hh_stotal)) +
         geom_histogram(binwidth = 1) +
-        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        scale_x_continuous(breaks = seq(0, 10, 1)) +
         xlab("\nTotal Number of Sisters in Household") + 
         ylab("Frequency Count\n")
 ```
@@ -213,6 +215,7 @@ tab.z
 ```
 
 A histogram describing the total number of sisters in the household is furnished below.
+
 `r fig.nums(name = "f02", caption = "Histogram, Total Number of Sisters in Household")`
 ```{r, echo = FALSE, results = "markdown"}
 #Step 3.0.7: Printing table
@@ -254,7 +257,7 @@ s.df %<>% mutate(hh_btotal = p.df$hh_btotal)
 #Step 4.0.6: Generating histogram
 fig.z = ggplot(data = s.df, aes(hh_btotal)) +
         geom_histogram(binwidth = 1) +
-        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        scale_x_continuous(breaks = seq(0, 10, 1)) +
         xlab("\nTotal Number of brothers in Household") + 
         ylab("Frequency Count\n")
 ```
@@ -268,6 +271,7 @@ tab.z
 ```
 
 A histogram describing the total number of sisters in the household is furnished below.
+
 `r fig.nums(name = "f03", caption = "Histogram, Total Number of Brothers in Household")`
 ```{r, echo = FALSE, results = "markdown"}
 #Step 4.0.7: Printing table
@@ -299,7 +303,7 @@ s.df %<>% mutate(hh_nsibling = hh_mtotal + hh_stotal)
 #Step 5.0.3: Generating histogram
 fig.z = ggplot(data = s.df, aes(hh_nsibling)) +
         geom_histogram(binwidth = 1) +
-        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        scale_x_continuous(breaks = seq(0, 25, 1)) +
         xlab("\nTotal Number of siblings in Household") + 
         ylab("Frequency Count\n")
 ```
@@ -313,6 +317,7 @@ tab.z
 ```
 
 A histogram describing the total number of sisters in the household is furnished below.
+
 `r fig.nums(name = "f04", caption = "Histogram, Total Number of Siblings in Household")`
 ```{r, echo = FALSE, results = "markdown"}
 #Step 4.0.7: Printing table
@@ -342,7 +347,70 @@ s.df %<>% mutate(hh_bothbiop = p.df$hh_nbioparent > 1)
 p.bioboth = round(prop.table(table(s.df$hh_bothbiop)) * 100, digits = 2)
 ```
 
-In counting the number of bio parents present in the household, an anomaly was observed wherein 1 record counted 3 bio parents in the household. For the purpose of this exercise, this response is treated as valid. Thus, the proportion of respondants who live with 2 or more bio parents (e.g., "both" bio parents) is `r p.bioboth[2]`%.
+In counting the number of bio parents present in the household, an anomaly was observed wherein 1 record counted 3 bio parents in the household. For the purpose of this exercise, this response is treated as valid. Thus, the proportion of respondents who live with 2 or more bio parents (e.g., "both" bio parents) is `r p.bioboth[2]`%.
+
+# Total of non-biological immediate family household members
+
+Building upon prior responses, we generate a proxy data frame for variables asking about the relationship of the respondent to the household member if they already identified the household member as "brother" or "sister". Then, we sum the total number of "full" siblings in the household with the number of "biological parents" in the household, and subtract that from the total number of household members to identify the total number of non-biological immediate family members in the household.
+
+```{r}
+#Step 7.0.1: Subsetting data frame
+p.df = s.df %>% select(starts_with("h1hr5"))
+
+#Step 7.0.2: Recoding values based on codebook
+p.df[p.df != 1 & p.df != 7] = 0
+p.df[p.df == 1 | p.df == 7] = 1
+
+#Step 7.0.3: Counting total number of responses indicating n'th HH member is a full sibling
+p.df %<>% mutate(hh_nfullsib = rowSums(p.df))
+
+#Step 7.0.4: Binding results to main data frame
+s.df %<>% mutate(hh_nfullsib = p.df$hh_nfullsib)
+
+#Step 7.0.5: Calculating the total number of immediate full family members
+s.df %<>% mutate(hh_nimfullfam = s.df$hh_nfullsib + s.df$hh_nbioparent)
+
+#Step 7.0.6: Calculating the total number of non-immediate full family members
+s.df %<>% mutate(hh_nfamother = s.df$hh_mtotal - s.df$hh_nimfullfam - 1)
+
+#Step 7.0.7: Tabulating frequency
+
+  ##Building table
+  tab.x = data.frame(table(s.df$hh_nfamother))
+  
+  ##Renaming table columns
+  names(tab.x) = c("Total number of non-immediate full-family household members", "Frequency")
+  
+  ##Formatting table
+  tab.z = kable(tab.x) %>% 
+          kable_styling(full_width = FALSE, 
+                        position = "left", 
+                        bootstrap_options = c("striped", "hover"))
+
+#Step 7.0.8: Generating histogram
+fig.z = ggplot(data = s.df, aes(hh_nfamother)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(0, 25, 1)) +
+        xlab("\nTotal Number of Non-Immediate Full-Family Household Members") + 
+        ylab("Frequency Count\n")
+```
+
+
+A frequency tabulation of the total number of household members who are neither biological parents nor full-siblings (e.g., non-immediate full family members) is furnished below.
+
+`r tab.nums(name = "t05", caption = "Frequency Table, Total Number Non-Immediate Full Family Members in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+tab.z
+```
+
+A histogram describing the total number of household members who are neither biological parents nor full-siblings (e.g., non-immediate full family members) is furnished below.
+
+`r fig.nums(name = "f05", caption = "Histogram, Total Number Non-Immediate Full Family Members in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+fig.z
+```
 
 # Source Code Appendix
 
