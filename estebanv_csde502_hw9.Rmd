@@ -1,7 +1,6 @@
 ---
 title: "CSDE 502: Assignment #9"
 author: "[Esteban J. Valencia](mailto:estebanv@uw.edu)"
-date: '`r format(Sys.time(), "%Y-%m-%d %H:%M")`'
 header-includes:
 - \usepackage{float} 
 - \floatplacement{figure}{H}
@@ -16,18 +15,6 @@ output:
       collapsed: TRUE
       smooth_scroll: TRUE
 urlcolor: blue
-
-output: 
-    bookdown::html_document2:
-        theme: journal
-        number_sections: true
-        self_contained: true
-        code_folding: hide
-        toc: true
-        toc_float:
-            collapsed: true
-            smooth_scroll: false
-urlcolor: blue        
 ---
 ```{css, echo=FALSE}
 #Step 0.0.1: Setting wide-wise scrolling
@@ -132,27 +119,47 @@ p.df[p.df == 7] = 0
 p.df %<>% mutate(hh_mtotal = rowSums(p.df) + 1)
 
 #Step 2.0.5: Binding results to main data frame
-s.df %<>% cbind(s.df, hh_mtotal = p.df$hh_mtotal)
+s.df %<>% cbind(hh_mtotal = p.df$hh_mtotal)
 
 ```
 
-A tabulation of the total number of HH members in each HH is furnished below, along with a histogram.
+A tabulation of the total number of HH members in each HH is furnished below.
 
 ```{r}
 #Step 2.0.6: Generating frequency tabulation
 
   ##Building table
   tab.x = data.frame(table(s.df$hh_mtotal))
+  tab.x$Var1 = as.integer(tab.x$Var1)
   
   ##Renaming table columns
-  names(tab.x) = c("Total number of HH members", "Frequency")
+  names(tab.x) = c("HH_Total", "n")
   
   ##Formatting table
-  tab.z = kable(tab.x) %>% kable_styling(full_width = FALSE)
-  
-  ##Printing table
+  tab.z = kable(tab.x) %>% 
+          kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
+```
 
+`r tab.nums(name = "t01", caption = "Frequency Table, Total Number of Household Members, Including Respondent")`
+```{r, results = "markdown"}
+#Step 2.0.7: Printing table
+tab.z
+```
 
+A histogram describing the total number of HH members in each HH is furnished below.
+
+```{r}
+#Step 2.0.8: Generating histogram
+fig.z = ggplot(data = s.df, aes(hh_mtotal)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        xlab("\nTotal Number of Household Members, Including Respondent") + 
+        ylab("Frequency Count\n")
+```
+
+`r fig.nums(name = "f01), caption = "Histogram, Total number of Household Members, Including Respondant")`
+```{r, results = "markdown"}
+fig.z
 ```
 
 # Source Code Appendix
