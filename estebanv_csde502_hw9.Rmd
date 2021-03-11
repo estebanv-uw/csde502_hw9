@@ -80,7 +80,7 @@ The requisite Add Health data are downloaded to a temporary directory and then u
   f.url = "http://staff.washington.edu/phurvitz/csde502_winter_2021/data/21600-0001-Data.dta.zip"
 
   ##Setting temporary directory
-  t.dir = tempdir()
+  t.dir = Sys.getenv("TEMP")
 
   ##Setting path for zipfile
   z.file = file.path(t.dir, basename = "21600-0001-Data.dta.zip")
@@ -107,6 +107,51 @@ The requisite Add Health data are downloaded to a temporary directory and then u
   
   ##Changing column names to lower case
   colnames(d.adh) %<>% str_to_lower()
+```
+
+# Total Number of Household Members
+
+The Add Health data do not contain a variable indicating the total number of siblings in a household members. Instead, they list a series of variables detailing the relationship of each household member to the respondent. As such, to identify the total number of household members, we must parse through these variables. First, we subset the data to contain only those variables of relevance (in teh Add Health data, those variables all begin with the prefix "H1HR").
+
+```{r}
+#Step 2.0.1: Subsetting variables
+s.df = d.adh %>% select(starts_with("h1hr"))
+```
+
+Next, a proxy data frame is generated from the series of variables which ask about HH members' gender, and the total number of HH members is counted based on responses.
+
+```{r}
+#Step 2.0.2: Generating proxy data frame
+p.df = s.df %>% select(starts_with("h1hr2"))
+
+#Step 2.0.3: Recoding values based on codebook
+p.df[p.df == 1 | p.df == 2 | p.df == 3 | p.df == 6 | p.df == 8] = 1
+p.df[p.df == 7] = 0
+
+#Step 2.0.4: Counting total number of responses indicating n'th HH member is present
+p.df %<>% mutate(hh_mtotal = rowSums(p.df) + 1)
+
+#Step 2.0.5: Binding results to main data frame
+s.df %<>% cbind(s.df, hh_mtotal = p.df$hh_mtotal)
+
+```
+
+A tabulation of the total number of HH members in each HH is furnished below, along with a histogram.
+
+```{r}
+#Step 2.0.6: Generating frequency tabulation
+
+  ##Building table
+  tab.x = data.frame(table(s.df$hh_mtotal))
+  
+  ##Renaming table columns
+  names(tab.x) = c("Total number of HH members", "Frequency")
+  
+  ##Formatting table
+  tab.z = kable(tab.x) %>% kable_styling(full_width = FALSE)
+  
+  ##Printing table
+
 
 ```
 
