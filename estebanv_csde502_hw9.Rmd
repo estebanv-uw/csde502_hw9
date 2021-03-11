@@ -1,0 +1,73 @@
+---
+title: "CSDE 502: Assignment #9"
+author: "[Esteban J. Valencia](mailto:estebanv@uw.edu)"
+date: '`r format(Sys.time(), "%Y-%m-%d %H:%M")`'
+header-includes:
+- \usepackage{float} 
+- \floatplacement{figure}{H}
+output:
+  bookdown::html_document2:
+    theme: journal
+    number_sections: TRUE
+    self_contained: TRUE
+    code_folding: hide
+    toc: TRUE
+    toc_float:
+      collapsed: TRUE
+      smooth_scroll: TRUE
+urlcolor: blue
+
+output: 
+    bookdown::html_document2:
+        theme: journal
+        number_sections: true
+        self_contained: true
+        code_folding: hide
+        toc: true
+        toc_float:
+            collapsed: true
+            smooth_scroll: false
+urlcolor: blue        
+---
+```{css, echo=FALSE}
+#Step 0.0.1: Setting wide-wise scrolling
+pre, code {white-space: pre !important; overflow-x: auto}
+
+```
+
+```{r setup, warning = FALSE, message = FALSE, results = "hide"}
+#Step 0.0.2: Specifying chunk options
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      results = "hide",
+                      width = 1000)
+
+#Step 0.0.3: Loading requisite packages from library
+library(captioner)
+library(dplyr)
+library(magrittr)
+library(knitr)
+library(kableExtra)
+
+#Step 0.0.4: Setting captions
+fig.nums = captioner(prefix = "Figure")
+tab.nums = captioner(prefix = "Table")
+```
+
+# Overview
+
+This assignment is intended to give you more practice delving into the Add Health data set and in manipulating additional variables.
+
+Using the full household roster (you'll need to go back to teh full raw data source) create the following variables for each respondents: (1) total number in household, (2) number of sisters, (3) number of brothers, (4) and total number of siblings.
+
+Additionally, calculate the proportion of students living with two biological parents. 
+
+Additionally, calculate the number of household members that are *NOT* the biological mother, biological father, full brother, or full sister.
+
+# Source Code Appendix
+
+The source code for this document is included below.
+```{r comment = ''}
+cat(readLines(con = "estebanv_csde502_hw9.Rmd"), sep = "\n")
+```
