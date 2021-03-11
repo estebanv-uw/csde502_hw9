@@ -98,7 +98,7 @@ The requisite Add Health data are downloaded to a temporary directory and then u
 
 # Total Number of Household Members
 
-The Add Health data do not contain a variable indicating the total number of siblings in a household members. Instead, they list a series of variables detailing the relationship of each household member to the respondent. As such, to identify the total number of household members, we must parse through these variables. First, we subset the data to contain only those variables of relevance (in teh Add Health data, those variables all begin with the prefix "H1HR").
+The Add Health data do not contain a variable indicating the total number of siblings in a household members. Instead, they list a series of variables detailing the relationship of each household member to the respondent. As such, to identify the total number of household members, we must parse through these variables. First, we subset the data to contain only those variables of relevance (in the Add Health data, those variables all begin with the prefix "H1HR").
 
 ```{r}
 #Step 2.0.1: Subsetting variables
@@ -158,7 +158,7 @@ fig.z = ggplot(data = s.df, aes(hh_mtotal)) +
         ylab("Frequency Count\n")
 ```
 
-`r fig.nums(name = "f01), caption = "Histogram, Total number of Household Members, Including Respondant")`
+`r fig.nums(name = "f01", caption = "Histogram, Total number of Household Members, Including Respondant")`
 ```{r, echo = FALSE, results = "markdown"}
 #Step 2.0.9: Printing figure
 fig.z
@@ -166,7 +166,7 @@ fig.z
 
 # Total number of Sisters
 
-Similar to the process of counting the total number of household members, we create a proxy data set counting the relationship of each household member to the respondent, and then summate the total responses of "sister"
+Similar to the process of counting the total number of household members, we create a proxy data set counting the relationship of each household member to the respondent, and then sum the total responses of "sister"
 
 ```{r}
 #Step 3.0.1: Generating proxy data frame
@@ -177,7 +177,7 @@ p.df[p.df != 8] = 0
 p.df[p.df == 8] = 1
 
 #Step 3.0.3: Counting total number of responses indicating n'th HH member is present
-p.df %<>% mutate(hh_stotal = rowSums(p.df) + 1)
+p.df %<>% mutate(hh_stotal = rowSums(p.df))
 
 #Step 3.0.4: Binding results to main data frame
 s.df %<>% cbind(hh_stotal = p.df$hh_stotal)
@@ -216,13 +216,114 @@ A histogram describing the total number of sisters in the household is furnished
 `r fig.nums(name = "f02", caption = "Histogram, Total Number of Sisters in Household")`
 ```{r, echo = FALSE, results = "markdown"}
 #Step 3.0.7: Printing table
-fig.x
+fig.z
 ```
+
+# Total number of Brothers
+
+Similar to the process of counting the total number of sisters, we create a proxy data set counting the relationship of each household member to the respondent, and then sum the total responses of "brother"
+
+```{r}
+#Step 4.0.1: Generating proxy data frame
+p.df = s.df %>% select(starts_with("h1hr3"))
+
+#Step 4.0.2: Recoding values based on codebook
+p.df[p.df != 5] = 0
+p.df[p.df == 5] = 1
+
+#Step 4.0.3: Counting total number of responses indicating n'th HH member is present
+p.df %<>% mutate(hh_btotal = rowSums(p.df))
+
+#Step 4.0.4: Binding results to main data frame
+s.df %<>% cbind(hh_btotal = p.df$hh_btotal)
+
+#Step 4.0.5: Tabulating frequency
+
+  ##Building table
+  tab.x = data.frame(table(s.df$hh_btotal))
+  
+  ##Renaming table columns
+  names(tab.x) = c("Total number of brothers", "Frequency")
+  
+  ##Formatting table
+  tab.z = kable(tab.x) %>% 
+          kable_styling(full_width = FALSE, 
+                        position = "left", 
+                        bootstrap_options = c("striped", "hover"))
+
+#Step 4.0.6: Generating histogram
+fig.z = ggplot(data = s.df, aes(hh_btotal)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        xlab("\nTotal Number of brothers in Household") + 
+        ylab("Frequency Count\n")
+```
+
+A frequency tabulation of the total number of sisters in the household is furnished below.
+
+`r tab.nums(name = "t03", caption = "Frequency Table, Total Number of Brothers in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+tab.z
+```
+
+A histogram describing the total number of sisters in the household is furnished below.
+`r fig.nums(name = "f03", caption = "Histogram, Total Number of Brothers in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+fig.z
+```
+
+# Total number of siblings
+
+To calculate the total number of siblings, we sum the total number of sisters and total number of brothers
+
+```{r}
+#Step 5.0.1: Counting total number of siblings
+s.df %<>% mutate(hh_nsibling = hh_mtotal + hh_stotal)
+
+#Step 5.0.2: Tabulating frequency
+
+  ##Building table
+  tab.x = data.frame(table(s.df$hh_nsibling))
+  
+  ##Renaming table columns
+  names(tab.x) = c("Total number of siblings", "Frequency")
+  
+  ##Formatting table
+  tab.z = kable(tab.x) %>% 
+          kable_styling(full_width = FALSE, 
+                        position = "left", 
+                        bootstrap_options = c("striped", "hover"))
+
+#Step 5.0.3: Generating histogram
+fig.z = ggplot(data = s.df, aes(hh_nsibling)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        xlab("\nTotal Number of siblings in Household") + 
+        ylab("Frequency Count\n")
+```
+
+A frequency tabulation of the total number of siblings in the household is furnished below.
+
+`r tab.nums(name = "t04", caption = "Frequency Table, Total Number of Siblings in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+tab.z
+```
+
+A histogram describing the total number of sisters in the household is furnished below.
+`r fig.nums(name = "f04", caption = "Histogram, Total Number of Siblings in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 4.0.7: Printing table
+fig.z
+```
+
 
 # Source Code Appendix
 
 The source code for this document is included below.
-```{r comment = ''}
+```{r comment = '', results = "markdown"}
 cat(readLines(con = "estebanv_csde502_hw9.Rmd"), sep = "\n")
 ```
 
