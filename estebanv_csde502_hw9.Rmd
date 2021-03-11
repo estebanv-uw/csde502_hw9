@@ -130,18 +130,19 @@ A tabulation of the total number of HH members in each HH is furnished below.
 
   ##Building table
   tab.x = data.frame(table(s.df$hh_mtotal))
-  tab.x$Var1 = as.integer(tab.x$Var1)
   
   ##Renaming table columns
-  names(tab.x) = c("HH_Total", "n")
+  names(tab.x) = c("Total number of household members", "Frequency")
   
   ##Formatting table
   tab.z = kable(tab.x) %>% 
-          kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
+          kable_styling(full_width = FALSE, 
+                        position = "left", 
+                        bootstrap_options = c("striped", "hover"))
 ```
 
 `r tab.nums(name = "t01", caption = "Frequency Table, Total Number of Household Members, Including Respondent")`
-```{r, results = "markdown"}
+```{r, echo = FALSE, results = "markdown"}
 #Step 2.0.7: Printing table
 tab.z
 ```
@@ -158,8 +159,64 @@ fig.z = ggplot(data = s.df, aes(hh_mtotal)) +
 ```
 
 `r fig.nums(name = "f01), caption = "Histogram, Total number of Household Members, Including Respondant")`
-```{r, results = "markdown"}
+```{r, echo = FALSE, results = "markdown"}
+#Step 2.0.9: Printing figure
 fig.z
+```
+
+# Total number of Sisters
+
+Similar to the process of counting the total number of household members, we create a proxy data set counting the relationship of each household member to the respondent, and then summate the total responses of "sister"
+
+```{r}
+#Step 3.0.1: Generating proxy data frame
+p.df = s.df %>% select(starts_with("h1hr3"))
+
+#Step 3.0.2: Recoding values based on codebook
+p.df[p.df != 8] = 0
+p.df[p.df == 8] = 1
+
+#Step 3.0.3: Counting total number of responses indicating n'th HH member is present
+p.df %<>% mutate(hh_stotal = rowSums(p.df) + 1)
+
+#Step 3.0.4: Binding results to main data frame
+s.df %<>% cbind(hh_stotal = p.df$hh_stotal)
+
+#Step 3.0.5: Tabulating frequency
+
+  ##Building table
+  tab.x = data.frame(table(s.df$hh_stotal))
+  
+  ##Renaming table columns
+  names(tab.x) = c("Total number of sisters", "Frequency")
+  
+  ##Formatting table
+  tab.z = kable(tab.x) %>% 
+          kable_styling(full_width = FALSE, 
+                        position = "left", 
+                        bootstrap_options = c("striped", "hover"))
+
+#Step 3.0.6: Generating histogram
+fig.z = ggplot(data = s.df, aes(hh_stotal)) +
+        geom_histogram(binwidth = 1) +
+        scale_x_continuous(breaks = seq(1, 25, 1)) +
+        xlab("\nTotal Number of Sisters in Household") + 
+        ylab("Frequency Count\n")
+```
+
+A frequency tabulation of the total number of sisters in the household is furnished below.
+
+`r tab.nums(name = "t02", caption = "Frequency Table, Total Number of Sisters in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 3.0.7: Printing table
+tab.z
+```
+
+A histogram describing the total number of sisters in the household is furnished below.
+`r fig.nums(name = "f02", caption = "Histogram, Total Number of Sisters in Household")`
+```{r, echo = FALSE, results = "markdown"}
+#Step 3.0.7: Printing table
+fig.x
 ```
 
 # Source Code Appendix
